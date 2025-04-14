@@ -1,1 +1,2 @@
 gui filter=lfs diff=lfs merge=lfs -text
+dist/gui filter=lfs diff=lfs merge=lfs -text

@@ -16,13 +16,15 @@ from customtkinter import DrawEngine
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import runSubProcess
 from data_processing import save_hdf5_from_nparray, visualize_result
-from utils import get_bbox_for_city,call_for_data
+from utils import get_bbox_for_city, call_for_data
 
 
 polygonList = []
 DISPLAYCORDS = []
 FIGURE = None
-CURRENT_FILE_PATH=""
+CURRENT_FILE_PATH = ""
+
+
 class App(customtkinter.CTk):
     """
     Main Application class
@@ -30,12 +32,13 @@ class App(customtkinter.CTk):
     APP_NAME = "Satellite Data Pipeline"
     WIDTH = 800
     HEIGHT = 400
-    file_path=""
-    shape =""
-    data=None
+    file_path = ""
+    shape = ""
+    data = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        DrawEngine.preferred_drawing_method="polygon_shapes"
+        DrawEngine.preferred_drawing_method = "polygon_shapes"
         self.figure = None
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
@@ -56,26 +59,31 @@ class App(customtkinter.CTk):
         self.create_pages(container)
 
         self.show_page("PageOne")
-    def set_data(self,data):
+
+    def set_data(self, data):
         """
         Setter for data
         """
-        self.data=data
+        self.data = data
+
     def get_data(self):
         """
         Getter for data
         """
         return self.data
-    def set_shape(self,shapeStr):
+
+    def set_shape(self, shapeStr):
         """
         Setter for shape
         """
         self.shape = shapeStr
+
     def get_shape(self):
         """
         Getter for shape
         """
         return self.shape
+
     def set_file_path(self, file_path):
         """
         Setter for file_path
@@ -87,6 +95,7 @@ class App(customtkinter.CTk):
         Getter for file_path
         """
         return self.file_path
+
     def create_pages(self, container):
         """
         Init the pages and add them to pages-dict.
@@ -99,14 +108,14 @@ class App(customtkinter.CTk):
         for page in self.pages.values():
             page.grid(row=0, column=0, sticky="nsew")
 
-    def show_page(self, page_name,option=False):
+    def show_page(self, page_name, option=False):
         """
         Navigation method, that raises and requested pages and hands over needed parameters
         """
         # Show the selected page
         page = self.pages[page_name]
         if page_name == "PageTwo":
-            filepath=''
+            filepath = ''
             # Use the existing PageOne instance to get parameters
             page_one = self.pages["PageOne"]
             if option:
@@ -117,7 +126,7 @@ class App(customtkinter.CTk):
             else:
                 page.buttonUse.pack_forget()
                 page.buttonSave.pack()
-            self.figure , data_selected= self.use_polygon(page_one,filepath)
+            self.figure, data_selected = self.use_polygon(page_one, filepath)
             page.controller.set_data(data_selected)
             # Pass the FIGURE to PageTwo
             page.set_figure(self.figure)
@@ -140,11 +149,11 @@ class App(customtkinter.CTk):
         """
         self.mainloop()
 
-    def use_polygon(self,pageOne,path=''):
+    def use_polygon(self, pageOne, path=''):
         """
         Calls for Satellitedata using the selected polygon
         """
-        if path=='':
+        if path == '':
             lat1, long1 = polygonList[0]
             lat2, long2 = polygonList[2]
             print((long1, lat1, long2, lat2))
@@ -152,15 +161,18 @@ class App(customtkinter.CTk):
             end_date = pageOne.endDate.get_date()
             cloudcover = pageOne.cloudSlider.get()
             print((start_date, end_date, cloudcover))
-            return call_for_data((long1, lat1, long2, lat2), start_date,end_date,cloudcover)
+            return call_for_data((long1, lat1, long2, lat2),
+                                 start_date, end_date, cloudcover)
         else:
-            return call_for_data(None,None,None,None,path)
+            return call_for_data(None, None, None, None, path)
+
 
 class PageOne(customtkinter.CTkFrame):
     """
     PageOne shows a tile-server map and the search parameters can be selected.
     Also acts as main menu, to jump to other screens if data already exists
     """
+
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -173,7 +185,8 @@ class PageOne(customtkinter.CTkFrame):
         self.frame_left.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
 
         self.frame_right = customtkinter.CTkFrame(master=self, corner_radius=0)
-        self.frame_right.grid(row=0, column=1, rowspan=1, pady=0, padx=0, sticky="nsew")
+        self.frame_right.grid(row=0, column=1, rowspan=1,
+                              pady=0, padx=0, sticky="nsew")
 
         # ============ frame_left ============
 
@@ -181,13 +194,13 @@ class PageOne(customtkinter.CTkFrame):
         self.button_2 = customtkinter.CTkButton(
             master=self.frame_left,
             text="Analyse existing set",
-            command= lambda: controller.show_page("PageTwo",True))
-        self.button_2.grid(pady=(20,0),padx=(20,20),row = 0, column=1)
+            command=lambda: controller.show_page("PageTwo", True))
+        self.button_2.grid(pady=(20, 0), padx=(20, 20), row=0, column=1)
 
         self.button_3 = (customtkinter.CTkButton(
             master=self.frame_left,
             text="View Results",
-            command= lambda: controller.show_page("PageThree",True)))
+            command=lambda: controller.show_page("PageThree", True)))
 
         self.button_3.grid(pady=(20, 0), padx=(20, 20), row=0, column=2)
 
@@ -197,7 +210,7 @@ class PageOne(customtkinter.CTkFrame):
         self.button_1.grid(pady=(20, 0), padx=(20, 20), row=0, column=0)
 
         self.startDateText = customtkinter.CTkLabel(master=self.frame_left,
-                                                    text = "Select a Start-Date!")
+                                                    text="Select a Start-Date!")
         self.startDateText.grid(pady=(20, 0), row=1, column=0)
         self.startDate = DateEntry(master=self.frame_left,
                                    selectmode='day',
@@ -226,19 +239,19 @@ class PageOne(customtkinter.CTkFrame):
         self.cloudSlider.grid(pady=(20, 0), row=3, column=1)
 
         self.cloudCoverDisplay = customtkinter.CTkLabel(master=self.frame_left,
-                                                        text=str(int(self.cloudSlider.get()))+"%")
-        self.cloudCoverDisplay.grid(pady=(20, 0),padx=(0,20), row=3, column=2)
+                                                        text=str(int(self.cloudSlider.get())) + "%")
+        self.cloudCoverDisplay.grid(
+            pady=(20, 0), padx=(0, 20), row=3, column=2)
 
-
-        self.map_label = customtkinter.CTkLabel(self.frame_left, text="Tile Server:", anchor="w")
+        self.map_label = customtkinter.CTkLabel(
+            self.frame_left, text="Tile Server:", anchor="w")
         self.map_label.grid(row=4, column=0, padx=(20, 20), pady=(20, 0))
         self.map_option_menu = customtkinter.CTkOptionMenu(self.frame_left,
                                                            values=["OpenStreetMap",
                                                                    "Google normal",
                                                                    "Google satellite"],
-                                                           command=self.change_map,width=180)
-        self.map_option_menu.grid(row=4 ,column=1, padx=(20, 20), pady=(10, 0))
-
+                                                           command=self.change_map, width=180)
+        self.map_option_menu.grid(row=4, column=1, padx=(20, 20), pady=(10, 0))
 
         # ============ frame_right ============
 
@@ -268,10 +281,9 @@ class PageOne(customtkinter.CTkFrame):
 
         self.map_option_menu.set("Google satellite")
         self.map_widget.set_tile_server(
-            "https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga",max_zoom=22)
+            "https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         lat, long = get_bbox_for_city("Innsbruck", True)
         self.map_widget.set_position(lat, long)
-
 
         def add_marker_event(coords):
             """
@@ -318,8 +330,7 @@ class PageOne(customtkinter.CTkFrame):
         lat, long = get_bbox_for_city(self.entry.get(), True)
         self.map_widget.set_position(lat, long)
 
-
-    def update_slider_percentage(self,value):
+    def update_slider_percentage(self, value):
         """
         Handles the user changing the slider for cloud percentage
         """
@@ -343,7 +354,8 @@ class PageOne(customtkinter.CTkFrame):
         Changes the tile-server map
         """
         if new_map == "OpenStreetMap":
-            self.map_widget.set_tile_server("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            self.map_widget.set_tile_server(
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
         elif new_map == "Google normal":
             self.map_widget.set_tile_server(
                 "https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga",
@@ -353,10 +365,12 @@ class PageOne(customtkinter.CTkFrame):
                 "https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga",
                 max_zoom=22)
 
+
 class PageTwo(customtkinter.CTkFrame):
     """
     PageTwo is used to display pre-processed data and to confirm its usage
     """
+
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -366,17 +380,19 @@ class PageTwo(customtkinter.CTkFrame):
             self,
             text="These are your results, you can either save them or select another region!")
         label.pack(pady=10, padx=10)
-        self.file_path=""
+        self.file_path = ""
         # Button to go back
         self.button = customtkinter.CTkButton(
             self,
             text="Go Back",
             command=lambda: controller.show_page("PageOne"))
         self.button.pack(pady=10)
-        self.buttonSave = customtkinter.CTkButton(self,text="Save", command=self.save)
+        self.buttonSave = customtkinter.CTkButton(
+            self, text="Save", command=self.save)
         self.buttonSave.pack(pady=10)
 
-        self.buttonUse = customtkinter.CTkButton(self, text="Use set!", command=self.use)
+        self.buttonUse = customtkinter.CTkButton(
+            self, text="Use set!", command=self.use)
         self.buttonUse.pack(pady=10)
 
     def save(self):
@@ -385,7 +401,7 @@ class PageTwo(customtkinter.CTkFrame):
         """
         file_path = filedialog.asksaveasfilename(
             defaultextension=".h5",
-            filetypes=[("HDF5","*.h5"),("All Files","*.*")],
+            filetypes=[("HDF5", "*.h5"), ("All Files", "*.*")],
             title="Save File")
         if not file_path:
             return
@@ -397,11 +413,13 @@ class PageTwo(customtkinter.CTkFrame):
             self.controller.show_page("PageThree")
         except Exception as e:
             print(e)
+
     def set_file_path(self, file_path):
         """
         Setter method file_path
         """
         self.file_path = file_path
+
     def use(self):
         """
         Used by the 'Use' button. Instead of asking where to save the file, since it's already
@@ -411,6 +429,7 @@ class PageTwo(customtkinter.CTkFrame):
         self.controller.set_shape(str(self.controller.get_data().shape[1]) + "," + str(
             self.controller.get_data().shape[0]))
         self.controller.show_page("PageThree")
+
     def set_figure(self, figure):
         """
         Used to visualize the gathered data from either the API or an existing file
@@ -429,20 +448,21 @@ class PageThree(customtkinter.CTkFrame):
     """
     PageThree is used to display results
     """
+
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.figure = None
         self.scatter = None
         self.controller = controller
-        self.file_path=""
+        self.file_path = ""
         label = customtkinter.CTkLabel(self, text="That worked!")
         label.pack(pady=10, padx=10)
         button = customtkinter.CTkButton(self, text="Go back main menu",
                                          command=lambda: controller.show_page("PageOne"))
         button.pack(pady=10)
 
-
-        self.text_display = customtkinter.CTkLabel(self, height=20, width=500, text="")
+        self.text_display = customtkinter.CTkLabel(
+            self, height=20, width=500, text="")
         self.text_display.pack(pady=10, padx=10)
 
     def run_detection(self):
@@ -451,26 +471,31 @@ class PageThree(customtkinter.CTkFrame):
         Finds previously selected or created base_data .h5 file and runs detection
         also displays detection results
         """
-        outputdir = filedialog.askdirectory(title="Select an End-Folder!",initialdir=os.getcwd())
+        outputdir = filedialog.askdirectory(
+            title="Select an End-Folder!", initialdir=os.getcwd())
 
-        print("rundetection"+self.controller.get_file_path())
-        message_from_sub=runSubProcess.execute_sub_process(self.controller.get_file_path(),
-                                          self.controller.get_shape(), outputdir)
+        print("rundetection" + self.controller.get_file_path())
+        message_from_sub = runSubProcess.execute_sub_process(self.controller.get_file_path(),
+                                                             self.controller.get_shape(), outputdir)
         print(message_from_sub)
-        path_to_result = os.path.join(outputdir,Path(self.controller.get_file_path()).stem+"_mask.h5")
-        print("path_to_result"+path_to_result)
-        with h5py.File(path_to_result,"r") as f:
-            mask_array=np.array(f["mask"])
-        base_data= self.controller.get_data()
+        path_to_result = os.path.join(outputdir, Path(
+            self.controller.get_file_path()).stem + "_mask.h5")
+        print("path_to_result" + path_to_result)
+        with h5py.File(path_to_result, "r") as f:
+            mask_array = np.array(f["mask"])
+        base_data = self.controller.get_data()
         save_data_base = base_data
-        mask_array = np.reshape(mask_array,(mask_array.shape[0],mask_array.shape[1],1))
-        #mask_array = np.rot90(mask_array)
-        base_data=np.concatenate((base_data,mask_array),2)
-        count_pixels , percentage = self.view_result_file(base_data)
+        mask_array = np.reshape(
+            mask_array, (mask_array.shape[0], mask_array.shape[1], 1))
+        # mask_array = np.rot90(mask_array)
+        base_data = np.concatenate((base_data, mask_array), 2)
+        count_pixels, percentage = self.view_result_file(base_data)
         path_to_result_set = os.path.join(
             outputdir,
-            Path(self.controller.get_file_path()).stem+"_results.h5")
-        self.save_result_file(save_data_base,mask_array,count_pixels,percentage,path_to_result_set)
+            Path(self.controller.get_file_path()).stem + "_results.h5")
+        self.save_result_file(save_data_base, mask_array,
+                              count_pixels, percentage, path_to_result_set)
+
     def view_file_only(self):
         """
         Opens a .h5 File specified by user which has to be formatted as described in
@@ -478,9 +503,9 @@ class PageThree(customtkinter.CTkFrame):
         """
         path_to_file = filedialog.askopenfilename(
             initialdir=os.getcwd(),
-            filetypes=[("HDF5","*.h5")],
+            filetypes=[("HDF5", "*.h5")],
             title="Select results to view!")
-        with h5py.File(path_to_file,"r") as f:
+        with h5py.File(path_to_file, "r") as f:
             mask_array = np.array(f["mask"])
             base_data = np.array(f["img"])
             mask_array = np.reshape(mask_array,
@@ -489,7 +514,7 @@ class PageThree(customtkinter.CTkFrame):
             base_data = np.concatenate((base_data, mask_array), 2)
             self.view_result_file(base_data)
 
-    def view_result_file(self,base_data):
+    def view_result_file(self, base_data):
         """
         Visualizes AxBx15 nparray with :,:,15 being the result mask
         Returns Percentage and Count of Pixels
@@ -506,13 +531,14 @@ class PageThree(customtkinter.CTkFrame):
         self.scatter.get_tk_widget().pack(pady=10, padx=10)
         self.scatter.draw()
         return count_pixels, percentage
-    def save_result_file(self,base_data, mask_data, count,percentage,path):
+
+    def save_result_file(self, base_data, mask_data, count, percentage, path):
         """
         Saves results to a .h5 file
         Includes used processing data as well as mask data
         Saves Count of Pixels and Percentage of Landslide Pixels
         """
-        with h5py.File(path,"w") as f:
+        with h5py.File(path, "w") as f:
             f.create_dataset("mask", data=mask_data)
             f.create_dataset("img", data=base_data)
 

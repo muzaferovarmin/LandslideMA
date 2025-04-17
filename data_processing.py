@@ -11,7 +11,7 @@ from scipy.ndimage import median_filter
 import richdem as rd
 
 
-def save_hdf5_from_nparray(data,path):
+def save_hdf5_from_nparray(data, path):
     """
     Save normalized base_data to HDF5 file.
     This is the 'img' dataset
@@ -36,6 +36,8 @@ def save_hdf5_from_nparray(data,path):
     print(data)
     with h5py.File(path, "w") as h5file:
         h5file.create_dataset("img", data.shape, dtype='float64', data=data)
+
+
 def visualize_as_tiles_h5(h5_file, show=True):
     """
     Creates the plots for the 2x7 Subplot matrix of base_data
@@ -60,7 +62,7 @@ def visualize_as_tiles_h5(h5_file, show=True):
             ax.axis('off')
 
     plt.tight_layout()
-    return fig,data
+    return fig, data
 
 
 def visualize_as_tiles_np_array(numpy_array):
@@ -69,7 +71,8 @@ def visualize_as_tiles_np_array(numpy_array):
     Takes in numpy-array
     """
     # Create 2 rows with 7 subplots each (for 14 bands)
-    fig, axes = plt.subplots(2, 7, figsize=(20, 10))  # Increased height for 2 rows
+    # Increased height for 2 rows
+    fig, axes = plt.subplots(2, 7, figsize=(20, 10))
 
     # Flatten the axes array for easy iteration
     axes = axes.flatten()
@@ -92,7 +95,8 @@ def visualize_result(numpy_array):
     Takes in numpy array and handles data-extraction
     """
     fig = plt.figure(figsize=(15, 8))
-    gridSpecLayout = gridspec.GridSpec(3, 7, figure=fig, height_ratios=[1, 1, 2])
+    gridSpecLayout = gridspec.GridSpec(
+        3, 7, figure=fig, height_ratios=[1, 1, 2])
 
     # Plot first 14 layers
     for i in range(14):
@@ -105,7 +109,8 @@ def visualize_result(numpy_array):
         min_val, max_val = np.min(channel), np.max(channel)
         if max_val == min_val:
             return np.full_like(channel, 128, dtype='uint8')
-        scaled= ((channel - min_val) / (max_val - min_val) * 255).astype('uint8')
+        scaled = ((channel - min_val) / (max_val - min_val)
+                  * 255).astype('uint8')
 
         return scaled
     red = normalize(numpy_array[:, :, 3])  # Channel 4 as Red
@@ -115,7 +120,7 @@ def visualize_result(numpy_array):
     rgb = np.dstack((red, green, blue))  # Correct order: R-G-B
     mask = numpy_array[:, :, 14]
     red_mask = np.zeros_like(rgb, dtype='uint8')
-    red_mask[...,0] = 255*mask
+    red_mask[..., 0] = 255 * mask
 
     # Plot RGB
     ax_bottom = fig.add_subplot(gridSpecLayout[2, :])
@@ -125,21 +130,25 @@ def visualize_result(numpy_array):
     ax_bottom.axis('off')
     countLandslidePixels = np.sum(mask)
     percentageLandslidePixels = (
-            countLandslidePixels / float(numpy_array.shape[0]*numpy_array.shape[1]))
+        countLandslidePixels / float(numpy_array.shape[0] * numpy_array.shape[1]))
 
     return fig, countLandslidePixels, percentageLandslidePixels
-def concatenate_dem_and_image(dem,image,metadata=None):
+
+
+def concatenate_dem_and_image(dem, image, metadata=None):
     """
     Takes in DEM and image-data. Reshapes and concatenates them to be AXBX14 numpy array.
     """
     print(dem.shape)
     dem_shape_dim1 = dem.shape[0]
     dem_shape_dim2 = dem.shape[1]
-    dem_rd_array = rd.rdarray(dem,no_data=-9999, metadata=metadata)
-    slope = rd.TerrainAttribute(dem_rd_array, attrib='slope_riserun', zscale=1.0)
-    slope = np.array(slope).reshape((dem_shape_dim1, dem_shape_dim2,1))
-    dem = np.reshape(dem_rd_array, (dem_shape_dim1, dem_shape_dim2,1))
+    dem_rd_array = rd.rdarray(dem, no_data=-9999, metadata=metadata)
+    slope = rd.TerrainAttribute(
+        dem_rd_array,
+        attrib='slope_riserun',
+        zscale=1.0)
+    slope = np.array(slope).reshape((dem_shape_dim1, dem_shape_dim2, 1))
+    dem = np.reshape(dem_rd_array, (dem_shape_dim1, dem_shape_dim2, 1))
     data = np.concatenate((image, slope), axis=2)
     data = np.concatenate((data, dem), axis=2)
     return data
-

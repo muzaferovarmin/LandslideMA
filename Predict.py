@@ -1,11 +1,10 @@
-import argparse
 import numpy as np
 import os
 import torch
 import torch.nn as nn
 from torch.utils import data
 
-from dataset.landslide_dataset import LandslideDataSet
+import utils
 from model.Networks import unet
 import h5py
 
@@ -37,51 +36,25 @@ def importName(modulename, name):
         return None
     return vars(module)[name]
 
-def get_arguments():
-    parser = argparse.ArgumentParser(description="Baseline method for Land4Seen")
-
-    parser.add_argument("--data_dir", type=str, default='./',
-                        help="dataset path.")
-    parser.add_argument("--model_module", type=str, default='model.Networks',
-                        help='model module to import')
-    parser.add_argument("--model_name", type=str, default='unet',
-                        help='model name in given module')
-    parser.add_argument("--input_file", type=str, default='gornjatuzla.h5',
-                        help="Path to input H5 file")
-    parser.add_argument("--input_size", type=str, default='256,256',
-                        help="width and height of input images.")
-    parser.add_argument("--num_classes", type=int, default=2,
-                        help="number of classes.")
-    parser.add_argument("--num_workers", type=int, default=0,
-                        help="number of workers for multithread dataloading.")
-    parser.add_argument("--snapshot_dir", type=str, default='./test_map/',
-                        help="where to save predicted maps.")
-    parser.add_argument("--restore_from", type=str, default='DetectionScript/exp/batch2500_F1_7383.pth',
-                        help="trained model.")
-
 
     return parser.parse_args()
-
-def main():
-    args = get_arguments()
-    snapshot_dir = args.snapshot_dir
+restore_from=utils.resource_path('exp/batch2500_F1_7383.pth')
+def main(input_file,size, outputdir):
+    snapshot_dir = outputdir
     if not os.path.exists(snapshot_dir):
         os.makedirs(snapshot_dir)
-
-    w, h = map(int, args.input_size.split(','))
-    input_size = (w, h)
-
     # Create network
-    model = unet(n_classes=args.num_classes)
+    model = unet(n_classes=2)
 
-    saved_state_dict = torch.load(args.restore_from, map_location=torch.device('cpu'))
+    saved_state_dict = torch.load(restore_from, map_location=torch.device('cpu'))
     model.load_state_dict(saved_state_dict)
 
     test_loader = data.DataLoader(
-        SingleH5Dataset(args.input_file),
-        batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True
+        SingleH5Dataset(input_file),
+        batch_size=1, shuffle=False, num_workers=0, pin_memory=True
     )
-
+    w, h = map(int, size.split(','))
+    input_size = (w, h)
     interp = nn.Upsample(size=(input_size[1], input_size[0]), mode='bilinear')
 
     print('Testing..........')

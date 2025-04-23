@@ -2,13 +2,13 @@
 Handles all visualizations, concatenations and normalizations.
 A lot of tions.
 """
-import rasterio
+
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from scipy.ndimage import median_filter
-import richdem as rd
+from scipy.ndimage import sobel
+
 
 
 def save_hdf5_from_nparray(data, path):
@@ -139,16 +139,23 @@ def concatenate_dem_and_image(dem, image, metadata=None):
     """
     Takes in DEM and image-data. Reshapes and concatenates them to be AXBX14 numpy array.
     """
-    print(dem.shape)
+    print(image.shape)
     dem_shape_dim1 = dem.shape[0]
     dem_shape_dim2 = dem.shape[1]
-    dem_rd_array = rd.rdarray(dem, no_data=-9999, metadata=metadata)
-    slope = rd.TerrainAttribute(
-        dem_rd_array,
-        attrib='slope_riserun',
-        zscale=1.0)
+
+    slope_dz_dx = sobel(dem, axis=1,mode='nearest' )/(8*10)
+    slope_dz_dy = sobel(dem, axis=0,mode='nearest' )/(8*10)
+
+    slope_rad= np.arctan(np.sqrt(slope_dz_dx**2+ slope_dz_dy**2))
+    slope= np.degrees(slope_rad)
+
+    # dem_rd_array = rd.rdarray(dem, no_data=-9999, metadata=metadata)
+    #slope = rd.TerrainAttribute(
+    #    dem_rd_array,
+    #    attrib='slope_riserun',
+    #    zscale=1.0)
     slope = np.array(slope).reshape((dem_shape_dim1, dem_shape_dim2, 1))
-    dem = np.reshape(dem_rd_array, (dem_shape_dim1, dem_shape_dim2, 1))
+    dem = np.reshape(dem, (dem_shape_dim1, dem_shape_dim2, 1))
     data = np.concatenate((image, slope), axis=2)
     data = np.concatenate((data, dem), axis=2)
     return data

@@ -2,6 +2,9 @@
 Utils Module:
 This module provides utility functions for the app
 """
+import os
+import sys
+
 import numpy as np
 import requests
 
@@ -9,7 +12,7 @@ from copernicus_api import authenticate_with_copernicus, fetch_dem_data, fetch_s
 from data_processing import (concatenate_dem_and_image,
                              visualize_as_tiles_np_array, visualize_as_tiles_h5)
 from requestDefinitions import EVALSCRIPT_DEM, EVALSCRIPT_RGB_IMAGE
-from secrets_app import secret_header
+
 
 
 def get_bbox_for_city(city_name, guiuse=False):
@@ -19,7 +22,7 @@ def get_bbox_for_city(city_name, guiuse=False):
     """
     geocode_url = (f"https://nominatim.openstreetmap.org/search?q={city_name}"
                    f"&format=json&polygon_geojson=1")
-    headers = secret_header
+    headers = {'User-Agent':'Landslide-Thesis|ma3608@mci4me.at'}
     response = requests.get(geocode_url, headers=headers, timeout=100)
     if response.status_code == 200:
         data = response.json()
@@ -61,3 +64,9 @@ def call_for_data(bbox, starttime, enddtime, cloudpercentage, path=''):
     else:
         figure, data = visualize_as_tiles_h5(path)
         return figure, data
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource"""
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)

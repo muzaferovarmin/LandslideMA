@@ -2,10 +2,10 @@
 Main GUI module
 Houses all Page Classes as well as the App Class
 """
-
+import json
 import os
 from pathlib import Path
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import customtkinter
 from tkintermapview import TkinterMapView
 from tkcalendar import DateEntry
@@ -14,16 +14,18 @@ import h5py
 import numpy as np
 from customtkinter import DrawEngine
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import runSubProcess
+import tkinter as tk
+import Predict
 from data_processing import save_hdf5_from_nparray, visualize_result
 from utils import get_bbox_for_city, call_for_data
+import credentials
+
 
 
 polygonList = []
 DISPLAYCORDS = []
 FIGURE = None
 CURRENT_FILE_PATH = ""
-
 
 class App(customtkinter.CTk):
     """
@@ -35,6 +37,7 @@ class App(customtkinter.CTk):
     file_path = ""
     shape = ""
     data = None
+    CONFIG_PATH = os.path.expanduser("~/.myguiapp_config.json")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,6 +62,41 @@ class App(customtkinter.CTk):
         self.create_pages(container)
 
         self.show_page("PageOne")
+
+    def open_update_dialog(self):
+        """
+        Command for the Credential Update
+        """
+        update_win = tk.Toplevel()
+        update_win.title("Update Credentials")
+
+        tk.Label(update_win, text="Client ID:").grid(row=0, column=0)
+        cid_entry = tk.Entry(update_win)
+        cid_entry.grid(row=0, column=1)
+
+        tk.Label(update_win, text="Client Secret:").grid(row=1, column=0)
+        cs_entry = tk.Entry(update_win, show="*")
+        cs_entry.grid(row=1, column=1)
+
+        # Prefill with existing values
+        stored_id, stored_secret = credentials.get_credentials()
+        if stored_id:
+            cid_entry.insert(0, stored_id)
+        if stored_secret:
+            cs_entry.insert(0, stored_secret)
+
+        def update_and_close():
+            new_id = cid_entry.get()
+            new_secret = cs_entry.get()
+            if new_id and new_secret:
+                credentials.save_credentials(new_id, new_secret)
+                messagebox.showinfo("Success", "Credentials updated.")
+                update_win.destroy()
+            else:
+                messagebox.showerror("Error", "Both fields are required.")
+
+        tk.Button(update_win, text="Save", command=update_and_close).grid(row=2, column=0,
+                                                                          columnspan=2, pady=10)
 
     def set_data(self, data):
         """
@@ -147,6 +185,14 @@ class App(customtkinter.CTk):
         """
         Init the app
         """
+
+        menu_bar = tk.Menu(self)
+        settings_menu = tk.Menu(menu_bar, tearoff=0)
+        settings_menu.add_command(label="Update Credentials", command=self.open_update_dialog)
+        menu_bar.add_cascade(label="Settings", menu=settings_menu)
+        self.config(menu=menu_bar)
+
+
         self.mainloop()
 
     def use_polygon(self, pageOne, path=''):
@@ -475,9 +521,9 @@ class PageThree(customtkinter.CTkFrame):
             title="Select an End-Folder!", initialdir=os.getcwd())
 
         print("rundetection" + self.controller.get_file_path())
-        message_from_sub = runSubProcess.execute_sub_process(self.controller.get_file_path(),
-                                                             self.controller.get_shape(), outputdir)
-        print(message_from_sub)
+        Predict.main(self.controller.get_file_path(),
+                                        self.controller.get_shape(), outputdir)
+
         path_to_result = os.path.join(outputdir, Path(
             self.controller.get_file_path()).stem + "_mask.h5")
         print("path_to_result" + path_to_result)

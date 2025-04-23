@@ -6,15 +6,15 @@ import tifffile
 from oauthlib.oauth2 import BackendApplicationClient
 from pyproj import Transformer
 from requests_oauthlib import OAuth2Session
-from secrets_app import secret_client_id, secret_client_secret
+
+import credentials
 
 
 def authenticate_with_copernicus():
     """
     Authenticate with Copernicus Dataspace using credentials from secrets_app.py
     """
-    client_id = secret_client_id
-    client_secret = secret_client_secret
+    client_id, client_secret = credentials.get_credentials()
     client = BackendApplicationClient(client_id=client_id)
     oauth = OAuth2Session(client=client)
     token_url = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token'

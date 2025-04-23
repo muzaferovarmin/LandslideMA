@@ -5,7 +5,7 @@ The .h5 file can then be scanned for land-slides using the baseline model of the
 
 GUI was done using CustomTKinter (https://github.com/TomSchimansky/CustomTkinter) as well as TkinterMap(https://github.com/TomSchimansky/TkinterMapView)
 
-## Usage run
+## Usage
 Simply Download the Executable for your operating system from the dist folder and run it!
 You will be asked for your Copernicus Dataspace Credentials which can be retrieved here https://shapps.dataspace.copernicus.eu/dashboard/#/account/settings after registering for a dataspace account!
 

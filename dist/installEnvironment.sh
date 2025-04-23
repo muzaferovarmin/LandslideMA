@@ -1,1 +1,0 @@
-conda env create --prefix ./DetectionEnvironment -f detection_environment.yml

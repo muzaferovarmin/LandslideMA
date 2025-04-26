@@ -146,8 +146,8 @@ def concatenate_dem_and_image(dem, image, metadata=None):
     slope_dz_dx = sobel(dem, axis=1,mode='nearest' )/(8*10)
     slope_dz_dy = sobel(dem, axis=0,mode='nearest' )/(8*10)
 
-    slope_rad= np.arctan(np.sqrt(slope_dz_dx**2+ slope_dz_dy**2))
-    slope= np.degrees(slope_rad)
+    slope= np.tan(np.sqrt(slope_dz_dx**2+ slope_dz_dy**2))*100
+
 
     # dem_rd_array = rd.rdarray(dem, no_data=-9999, metadata=metadata)
     #slope = rd.TerrainAttribute(
@@ -155,6 +155,8 @@ def concatenate_dem_and_image(dem, image, metadata=None):
     #    attrib='slope_riserun',
     #    zscale=1.0)
     slope = np.array(slope).reshape((dem_shape_dim1, dem_shape_dim2, 1))
+    print("SLOPE")
+    print(slope)
     dem = np.reshape(dem, (dem_shape_dim1, dem_shape_dim2, 1))
     data = np.concatenate((image, slope), axis=2)
     data = np.concatenate((data, dem), axis=2)

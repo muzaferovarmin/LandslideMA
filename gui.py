@@ -42,7 +42,7 @@ class App(customtkinter.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         DrawEngine.preferred_drawing_method = "polygon_shapes"
-        self.figure = None
+
         self.title(App.APP_NAME)
         self.geometry(str(App.WIDTH) + "x" + str(App.HEIGHT))
         self.minsize(App.WIDTH, App.HEIGHT)
@@ -237,23 +237,23 @@ class PageOne(customtkinter.CTkFrame):
         # ============ frame_left ============
 
         self.frame_left.grid_rowconfigure(2, weight=1)
-        self.button_2 = customtkinter.CTkButton(
+        self.button_existingSet = customtkinter.CTkButton(
             master=self.frame_left,
             text="Analyse existing set",
             command=lambda: controller.show_page("PageTwo", True))
-        self.button_2.grid(pady=(20, 0), padx=(20, 20), row=0, column=1)
+        self.button_existingSet.grid(pady=(20, 0), padx=(20, 20), row=0, column=1)
 
-        self.button_3 = (customtkinter.CTkButton(
+        self.button_viewResults = (customtkinter.CTkButton(
             master=self.frame_left,
             text="View Results",
             command=lambda: controller.show_page("PageThree", True)))
 
-        self.button_3.grid(pady=(20, 0), padx=(20, 20), row=0, column=2)
+        self.button_viewResults.grid(pady=(20, 0), padx=(20, 20), row=0, column=2)
 
-        self.button_1 = customtkinter.CTkButton(master=self.frame_left,
+        self.button_GatherData = customtkinter.CTkButton(master=self.frame_left,
                                                 text="Use for AI!",
                                                 command=lambda: controller.show_page("PageTwo"))
-        self.button_1.grid(pady=(20, 0), padx=(20, 20), row=0, column=0)
+        self.button_GatherData.grid(pady=(20, 0), padx=(20, 20), row=0, column=0)
 
         self.startDateText = customtkinter.CTkLabel(master=self.frame_left,
                                                     text="Select a Start-Date!")
@@ -314,21 +314,21 @@ class PageOne(customtkinter.CTkFrame):
 
         self.entry = customtkinter.CTkEntry(master=self.frame_right,
                                             placeholder_text="type address")
-        self.entry.grid(row=0, column=0, sticky="we", padx=(12, 0), pady=12)
+        self.entry.grid(row =0, column=0, sticky="we", padx=(12, 0), pady=12)
         self.entry.bind("<Return>", self.search_event)
 
-        self.button_5 = customtkinter.CTkButton(master=self.frame_right,
+        self.button_Search = customtkinter.CTkButton(master=self.frame_right,
                                                 text="Search",
                                                 width=90,
                                                 command=self.search_event)
-        self.button_5.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
+        self.button_Search.grid(row=0, column=1, sticky="w", padx=(12, 0), pady=12)
 
         # Set default values
 
         self.map_option_menu.set("Google satellite")
         self.map_widget.set_tile_server(
             "https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-        lat, long = get_bbox_for_city("Innsbruck", True)
+        lat, long = get_bbox_for_city("Innsbruck")
         self.map_widget.set_position(lat, long)
 
         def add_marker_event(coords):
@@ -404,7 +404,7 @@ class PageOne(customtkinter.CTkFrame):
                 "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
         elif new_map == "Google normal":
             self.map_widget.set_tile_server(
-                "https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga",
+                "c&x={x}&y={y}&z={z}&s=Ga",
                 max_zoom=22)
         elif new_map == "Google satellite":
             self.map_widget.set_tile_server(

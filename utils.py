@@ -15,7 +15,7 @@ from requestDefinitions import EVALSCRIPT_DEM, EVALSCRIPT_RGB_IMAGE
 
 
 
-def get_bbox_for_city(city_name, guiuse=False):
+def get_bbox_for_city(city_name):
     """
     This function gets the bounding box of a WKN
     by calling the calling the nominatim API using secrets_app.
@@ -28,11 +28,7 @@ def get_bbox_for_city(city_name, guiuse=False):
         data = response.json()
         if len(data) > 0:
             bbox = data[0]['boundingbox']
-
             print(bbox)
-            if not guiuse:
-                return float(bbox[2]), float(
-                    bbox[0]), float(bbox[3]), float(bbox[1])
             return float(data[0]['lat']), float(data[0]['lon'])
         raise ValueError("City not found in geocoding service.")
     raise requests.exceptions.HTTPError(

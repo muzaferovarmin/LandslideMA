@@ -148,12 +148,6 @@ def concatenate_dem_and_image(dem, image, metadata=None):
 
     slope= np.tan(np.sqrt(slope_dz_dx**2+ slope_dz_dy**2))*100
 
-
-    # dem_rd_array = rd.rdarray(dem, no_data=-9999, metadata=metadata)
-    #slope = rd.TerrainAttribute(
-    #    dem_rd_array,
-    #    attrib='slope_riserun',
-    #    zscale=1.0)
     slope = np.array(slope).reshape((dem_shape_dim1, dem_shape_dim2, 1))
     print("SLOPE")
     print(slope)

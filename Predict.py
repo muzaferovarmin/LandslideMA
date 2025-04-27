@@ -36,8 +36,6 @@ def importName(modulename, name):
         return None
     return vars(module)[name]
 
-
-    return parser.parse_args()
 restore_from=utils.resource_path('exp/batch2500_F1_7383.pth')
 def main(input_file,size, outputdir):
     snapshot_dir = outputdir

@@ -373,7 +373,7 @@ class PageOne(customtkinter.CTkFrame):
         """
         Handles user requests to searching WKN
         """
-        lat, long = get_bbox_for_city(self.entry.get(), True)
+        lat, long = get_bbox_for_city(self.entry.get())
         self.map_widget.set_position(lat, long)
 
     def update_slider_percentage(self, value):

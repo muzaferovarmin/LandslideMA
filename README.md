@@ -9,3 +9,4 @@ GUI was done using CustomTKinter (https://github.com/TomSchimansky/CustomTkinter
 Simply Download the Executable for your operating system from the dist folder and run it!
 You will be asked for your Copernicus Dataspace Credentials which can be retrieved here https://shapps.dataspace.copernicus.eu/dashboard/#/account/settings after registering for a dataspace account!
 
+MOVED TO PUBLIC REPO https://github.com/muzaferovarmin/MALandslide
